@@ -1,4 +1,6 @@
-# ff-node-monitor [![Build Status](https://travis-ci.org/freifunk-saar/ff-node-monitor.svg?branch=master)](https://travis-ci.org/freifunk-saar/ff-node-monitor)
+# ff-node-monitor [![Build Status](https://travis-ci.org/freifunk-nord/ff-node-monitor.svg?branch=master)](https://travis-ci.org/freifunk-nord/ff-node-monitor)
+
+> Dies ist die angepasste Version des **ff-node-monitor** für Freifunk Nord
 
 This is a simple web service for Freifunk networks that lets node operators
 register to monitor their nodes.  It uses the `nodes.json` from
@@ -21,8 +23,8 @@ Make sure you have at least 1.5 GB free disk space.
 1.  First, let's create a user for this service, and change to its home directory:
 
     ```
-    sudo adduser ff-node-monitor --home /opt/ff-node-monitor --system
-    cd /opt/ff-node-monitor
+    sudo adduser ff-node2-monitor --home /opt/ff-node2-monitor --system
+    cd /opt/ff-node2-monitor
     ```
 
 2.  We need some development libraries for the build process:
@@ -36,7 +38,7 @@ Make sure you have at least 1.5 GB free disk space.
 
     ```
     curl https://sh.rustup.rs -sSf > rustup.sh
-    sudo -u ff-node-monitor sh rustup.sh --default-toolchain $(cat rust-version)
+    sudo -u ff-node2-monitor sh rustup.sh --default-toolchain $(cat rust-version)
     rm rustup.sh
     ```
 
@@ -46,9 +48,9 @@ Make sure you have at least 1.5 GB free disk space.
 4.  Now we can fetch the sources and build them:
 
     ```
-    sudo -u ff-node-monitor git clone https://github.com/freifunk-saar/ff-node-monitor.git src
+    sudo -u ff-node2-monitor git clone https://github.com/freifunk-nord/ff-node-monitor.git src
     cd src
-    sudo -u ff-node-monitor /opt/ff-node-monitor/.cargo/bin/cargo build --release
+    sudo -u ff-node2-monitor /opt/ff-node2-monitor/.cargo/bin/cargo build --release
     ```
 
     > The build process takes a while, you can already finish the Database Setup
@@ -66,7 +68,7 @@ Make sure you have at least 1.5 GB free disk space.
     You can use
 
     ```
-    sudo -u ff-node-monitor ~ff-node-monitor/.cargo/bin/rustup toolchain list
+    sudo -u ff-node2-monitor ~ff-node2-monitor/.cargo/bin/rustup toolchain list
     ```
 
     to see which versions you have installed, and then `toolchain uninstall`
@@ -84,8 +86,8 @@ Make sure you have at least 1.5 GB free disk space.
     need to create a database for the service:
 
     ```
-    sudo -u postgres psql -c 'CREATE ROLE "ff-node-monitor" WITH LOGIN;'
-    sudo -u postgres psql -c 'CREATE DATABASE "ff-node-monitor" WITH OWNER = "ff-node-monitor" LC_COLLATE = '\''de_DE.utf8'\'' TEMPLATE template0;'
+    sudo -u postgres psql -c 'CREATE ROLE "ff-node2-monitor" WITH LOGIN;'
+    sudo -u postgres psql -c 'CREATE DATABASE "ff-node2-monitor" WITH OWNER = "ff-node2-monitor" LC_COLLATE = '\''de_DE.utf8'\'' TEMPLATE template0;'
     ```
 
     You may have to install the `de_DE.UTF-8` locale before this works.  On
@@ -97,8 +99,8 @@ Make sure you have at least 1.5 GB free disk space.
     directory.  You can start by copying the template:
 
     ```
-    cd /opt/ff-node-monitor/src
-    sudo -u ff-node-monitor cp Rocket.toml.dist Rocket.toml
+    cd /opt/ff-node2-monitor/src
+    sudo -u ff-node2-monitor cp Rocket.toml.dist Rocket.toml
     chmod 600 Rocket.toml
     ```
 
@@ -108,11 +110,11 @@ Make sure you have at least 1.5 GB free disk space.
 9.  To run the service using systemd, the `.service` file needs to be installed:
 
     ```
-    sudo cp ff-node-monitor.service /etc/systemd/system/
+    sudo cp ff-node2-monitor.service /etc/systemd/system/
     sudo systemctl daemon-reload
-    sudo systemctl enable ff-node-monitor
-    sudo systemctl start ff-node-monitor
-    sudo systemctl status ff-node-monitor
+    sudo systemctl enable ff-node2-monitor
+    sudo systemctl start ff-node2-monitor
+    sudo systemctl status ff-node2-monitor
     ```
 
     If the last command does not show the service as running, you need to debug
@@ -125,12 +127,12 @@ Make sure you have at least 1.5 GB free disk space.
     the node monitor in the `node-monitor` subdirectory:
 
     ```
-    location /node-monitor/ {
-        proxy_pass http://127.0.0.1:8833/;
+    location /node2-monitor/ {
+        proxy_pass http://127.0.0.1:8834/;
     }
     # Directly serve static files, no need to run them through the app
-    location /node-monitor/static/ {
-        alias /opt/ff-node-monitor/src/static/;
+    location /node2-monitor/static/ {
+        alias /opt/ff-node2-monitor/src/static/;
     }
     ```
 
@@ -148,7 +150,7 @@ Make sure you have at least 1.5 GB free disk space.
     nodes and send notifications when their status changed:
 
     ```
-    sudo crontab -e -u ff-node-monitor
+    sudo crontab -e -u ff-node2-monitor
     ```
 
     Add the following line to that crontab, replacing `$ROOT_URL` by your `root` URL
@@ -165,12 +167,12 @@ That's it!  The service should now be running and working.
 To upgrade the service to the latest git version, follow these steps:
 
 ```
-cd /opt/ff-node-monitor/src/
+cd /opt/ff-node2-monitor/src/
 git pull
-sudo rm target/release/ff-node-monitor
-sudo -u ff-node-monitor /opt/ff-node-monitor/.cargo/bin/rustup default $(cat rust-version)
-sudo -u ff-node-monitor /opt/ff-node-monitor/.cargo/bin/cargo build --release
-sudo systemctl restart ff-node-monitor
+sudo rm target/release/ff-node2-monitor
+sudo -u ff-node2-monitor /opt/ff-node2-monitor/.cargo/bin/rustup default $(cat rust-version)
+sudo -u ff-node2-monitor /opt/ff-node2-monitor/.cargo/bin/cargo build --release
+sudo systemctl restart ff-node2-monitor
 ```
 
 Check [the CHANGELOG](CHANGELOG.md) to see if any manual steps are needed.
@@ -180,7 +182,7 @@ Check [the CHANGELOG](CHANGELOG.md) to see if any manual steps are needed.
 When something goes wrong, the first step should be to look at the error log:
 
 ```
-sudo journalctl -u ff-node-monitor.service
+sudo journalctl -u ff-node2-monitor.service
 ```
 
 ## Customization
@@ -216,7 +218,7 @@ inside. You can adapt `bootstrap.sh` as you like to test around with different
 settings. In your real setup you at least have to change the root URL where you
 will be hosting ff-node-monitor.
 
-You can then access the vagrant box at `http://localhost:8833`. If you want to
+You can then access the vagrant box at `http://localhost:8834`. If you want to
 login the server use
 
 ```

@@ -1,20 +1,20 @@
 [global.ff-node-monitor.ui]
 # The name and grammatical article of this instance.
-instance_name = "Freifunk ... Knotenüberwachung"
+instance_name = "Freifunk Nord Knotenalarm"
 # The sentence "Willkommen bei $instance_article_dative $instance_name" should be grammatically
 # correct.
-instance_article_dative = "der"
+instance_article_dative = "dem"
 # The sender address of the emails that are sent by ff-node-monitor.
-email_from = "...@...freifunk.net"
+email_from = "knotenalarm@freifunknord.de"
 
 [global.ff-node-monitor.urls]
 # The root URL where you will be hosting ff-node-monitor (with trailing slash)
-root = "https://host/node-monitor/"
+root = "https://nord.freifunk.net//knotenalarm/"
 # The URL to the hopglass nodes.json file.
-nodes = "https://host/path/nodes.json"
+nodes = "https://mesh.freifunknord.de/data/nodes.json"
 # URL to the source code (needed for AGPL compliance).  You can leave this unchanged if you didn't
 # change the code.  Otherwise, you have to upload the changed code somewhere and point to it here.
-sources = "https://github.com/freifunk-saar/ff-node-monitor"
+sources = "https://github.com/freifunk-nord/ff-node-monitor"
 # Optional: Absolute URL to another stylesheet that is included in the page.
 #stylesheet = "https://..."
 
@@ -24,19 +24,19 @@ sources = "https://github.com/freifunk-saar/ff-node-monitor"
 action_signing_key = "..."
 # Optional: Host to submit emails to.  That host must accept email with arbitrary destination
 # from this service.  Unless this is "localhost", the connection will be encrypted via STARTTLS.
-#smtp_host = "localhost"
+smtp_host = "eclabs.de"
 
 [global.databases]
 # PostgreSQL credentials.  If you followed the instructions in the README, the
 # default should work for you.
-postgres = { url = "postgres://ff-node-monitor@/ff-node-monitor" }
+postgres = { url = "postgres://ff-node2-monitor@/ff-node2-monitor" }
 
 [global]
 # The address on which ff-node-monitor will listen.  Use "0.0.0.0" to listen on all interfaces.
 # Stick with "127.0.0.1" if you are running this behind a reverse proxy (recommended).
-address = "127.0.0.1"
+address = "0.0.0.0"
 # The port must be at least 1024 because lower ports can only be opened by root, and you should
 # not run this service as root.
-port = 8833
+port = 8834
 # Secret key used by Rocket.  Generate this key with `openssl rand -base64 32`.
 secret_key = "..."
