@@ -60,7 +60,6 @@ mod json {
         crate memory_usage: Option<f64>,
         crate rootfs_usage: Option<f64>,
         crate loadavg: Option<f64>,
-        crate clients: Option<usize>,
     }
 
     #[derive(Deserialize, Debug)]
@@ -108,13 +107,19 @@ impl NodeData {
     }
 }
 
+#[must_use]
+pub enum UpdateResult {
+    AllOk,
+    NotEnoughOnline(usize),
+}
+
 /// Fetch the latest nodelist, update node state and send out emails
 pub fn update_nodes(
     db: &PgConnection,
     config: &config::Config,
-    renderer: config::Renderer,
+    renderer: &config::Renderer,
     email_sender: EmailSender,
-) -> Result<()> {
+) -> Result<UpdateResult> {
     let cur_nodes = reqwest::get(config.urls.nodes.clone())?;
     let cur_nodes: json::Nodes = serde_json::from_reader(cur_nodes)?;
 
@@ -130,6 +135,12 @@ pub fn update_nodes(
         }
     }
 
+    // Stop here if nearly all nodes are offline
+    let online_nodes = cur_nodes_map.values().filter(|data| data.online).count();
+    if online_nodes < config.ui.min_online_nodes.unwrap_or(0) {
+        return Ok(UpdateResult::NotEnoughOnline(online_nodes));
+    }
+    
     // Compute which nodes changed their state, also update node names in DB
     let changed : Vec<(String, NodeData)> = db.transaction::<_, anyhow::Error, _>(|| {
         let mut changed = Vec::new();
@@ -176,7 +187,7 @@ pub fn update_nodes(
                 })
                 .execute(db)?;
             if cur_data.online {
-                // The node online, so it appearing is a change from the implicit offline
+                // The node is online, so it appearing is a change from the implicit offline
                 // it was in when it did not exist.
                 changed.push((id, cur_data));
             }
@@ -209,5 +220,5 @@ pub fn update_nodes(
         }
     }
 
-    Ok(())
+    Ok(UpdateResult::AllOk)
 }
